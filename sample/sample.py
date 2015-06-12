@@ -7,8 +7,8 @@ sys.path.append("..")
 from baidupush import BaiduPush
 
 # 以下只是测试数据，请使用者自行修改为可用数据
-apiKey = "76Yi0ZBGGV2HrAziIiYEFtRh"
-secretKey = "xxxxxxxxxxxxx"
+apikey = "76Yi0ZBGGV2HrAziIiYEFtRh"
+secretkey = "xxxxxxxxxxxxx"
 user_id = "1105115563847474869"
 channel_id = 3944730196422489622
 
@@ -17,7 +17,7 @@ message_key = "key1"
 tagname = "test_tag"
 
 def test_pushMessage_to_user():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     push_type = BaiduPush.PUSH_TO_USER
     optional = dict()
     optional[BaiduPush.USER_ID] = user_id
@@ -28,7 +28,7 @@ def test_pushMessage_to_user():
     print ret
 
 def test_pushMessage_to_tag():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     push_type = BaiduPush.PUSH_TO_TAG
     tag_name = 'push'
     optional = dict()
@@ -37,7 +37,7 @@ def test_pushMessage_to_tag():
     print ret
 
 def test_pushMessage_to_all():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     push_type = BaiduPush.PUSH_TO_ALL
     optional = dict()
     ret = c.push_msg(push_type, message, message_key, optional)
@@ -45,56 +45,56 @@ def test_pushMessage_to_all():
 
 
 def test_queryBindList():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     optional = dict()
     optional[BaiduPush.CHANNEL_ID] = channel_id
     ret = c.query_bindlist(user_id, optional)
     print ret
 
 def test_verifyBind():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     optional = dict()
     optional[BaiduPush.DEVICE_TYPE] = BaiduPush.DEVICE_ANDRIOD
     ret = c.verify_bind(user_id, optional)
     print ret
 
 def test_fetchMessage():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     ret = c.fetch_msg(user_id)
     print ret
 
 def test_deleteMessage():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     msg_id = "111"
     ret = c.delete_msg(user_id, msg_id)
     print ret
 
 def test_setTag():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     optional = dict()
     optional[BaiduPush.USER_ID] = user_id
     ret = c.set_tag(tagname, optional)
     print ret
 
 def test_fetchTag():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     ret = c.fetch_tag()
     print ret
 
 def test_deleteTag():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     optional = dict()
     optional[BaiduPush.USER_ID] = user_id
     ret = c.delete_tag(tagname, optional)
     print ret
 
 def test_queryUserTag():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     ret = c.query_user_tag(user_id)
     print ret
 
 def test_queryDeviceType():
-    c = BaiduPush(apiKey, secretKey)
+    c = BaiduPush(apikey, secretkey)
     ret = c.query_device_type(channel_id)
     print ret
 
