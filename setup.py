@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-version = '0.1'
+version = '0.1.1'
 
 requires = [ 'ujson' ]
 
@@ -25,7 +25,7 @@ setup(
       name='baidupush',
       version=version,
       description='Python Client for Baidu Push APIs',
-      long_description=open('README.md', 'r').read(),
+      long_description=open('README.rst', 'r').read(),
       author='Cherish Chen',
       author_email='sinchb128@gmail.com',
       maintainer='sinchb',
