@@ -9,13 +9,21 @@
 import time
 import urllib
 import hashlib
-import json
+
+try:
+    # ujson is faster than normal json
+    from ujson import dumps
+except ImportError:
+    from json import dumps
 import requests
 
+class BaiduPushError(Exception):
+    pass
 
-class Channel(object):
+
+class BaiduPush(object):
     """
-    Channel类提供百度云推送服务端SDK的Python版本，
+    BaiduPush类提供百度云推送服务端SDK的Python版本，
     用户首先实例化这个类，设置自己的apikey和secretkey，即可使用Push服务接口
     """
     # 用户发起请求时的unix时间戳。本次请求签名的有效时间为该时间戳+10分钟
@@ -58,7 +66,7 @@ class Channel(object):
     # 消息标识。指定消息标识，自动覆盖相同消息标识的消息，只支持android、browser、pc三种设备类型。
     MSG_KEYS = 'msg_keys'
 
-    # 消息类型，0：消息（透传），1：通知，默认为0
+    # 消息类型，0:消息（透传），1:通知，默认为0
     MESSAGE_TYPE = 'message_type'
 
     # 可选消息类型
@@ -124,174 +132,197 @@ class Channel(object):
         self._secretkey = secretkey
         self.request_id = 0
 
-    def set_apikey(self, apikey):
-        self._apikey = apikey
+    @property
+    def apikey(self):
+        return self._apikey
 
-    def set_secretkey(self, secretkey):
-        self._secretkey = secretkey
+    @apikey.setter
+    def apikey(self, value):
+        self._apikey = value
+
+    @property
+    def secrectkey(self):
+        return self._secretkey
+
+    @secrectkey.setter
+    def secrectkey(self, value):
+        self._secretkey = value
 
     def get_requestid(self):
         return self.request_id
 
-    # 查询设备、应用、用户与百度Channel的绑定关系
     def query_bindlist(self, user_id, optional=None):
         """
-        参数：
-            str user_id：用户ID号
-            dict optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            查询设备、应用、用户与百度Channel的绑定关系
+        参数:
+            str user_id:用户ID号
+            dict optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [user_id, optional]
         arr_args = self._merge_args([self.USER_ID], tmp_args)
         arr_args[self.METHOD] = 'query_bindlist'
         return self._common_process(arr_args)
 
-    # 推送消息，该接口可用于推送单个人、一群人、所有人以及固定设备的使用场景
     def push_msg(self, push_type, messages, message_keys, optional=None):
         """
-        参数：
-            push_type：推送消息的类型
-            messages：消息内容
-            message_keys：消息key
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            推送消息，该接口可用于推送单个人、一群人、
+            所有人以及固定设备的使用场景
+        参数:
+            push_type:推送消息的类型
+            messages:消息内容
+            message_keys:消息key
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [push_type, messages, message_keys, optional]
-        arr_args = self._merge_args([self.PUSH_TYPE, self.MESSAGES, self.MSG_KEYS], tmp_args)
+        arr_args = self._merge_args([self.PUSH_TYPE, self.MESSAGES, \
+                                    self.MSG_KEYS], tmp_args)
         arr_args[self.METHOD] = 'push_msg'
         arr_args[self.PUSH_TYPE] = push_type
-        arr_args[self.MESSAGES] = json.dumps(arr_args[self.MESSAGES])
-        arr_args[self.MSG_KEYS] = json.dumps(arr_args[self.MSG_KEYS])
+        arr_args[self.MESSAGES] = dumps(arr_args[self.MESSAGES])
+        arr_args[self.MSG_KEYS] = dumps(arr_args[self.MSG_KEYS])
         return self._common_process(arr_args)
 
-    # 判断设备、应用、用户与Channel的绑定关系是否存在
     def verify_bind(self, user_id, optional=None):
         """
-        参数：
-            user_id：用户id
-            optional：可选参数
-        返回值：
-            成功：python数组；失败：False
+        描述:
+            判断设备、应用、用户与Channel的绑定关系是否存在
+        参数:
+            user_id:用户id
+            optional:可选参数
+        返回值:
+            成功:python数组；失败:False
         """
         tmp_args = [user_id, optional]
         arr_args = self._merge_args([self.USER_ID], tmp_args)
         arr_args[self.METHOD] = 'verify_bind'
         return self._common_process(arr_args)
 
-    # 查询离线消息
     def fetch_msg(self, user_id, optional=None):
         """
-        参数：
-            user_id：用户id
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            查询离线消息
+        参数:
+            user_id:用户id
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [user_id, optional]
         arr_args = self._merge_args([self.USER_ID], tmp_args)
         arr_args[self.METHOD] = 'fetch_msg'
         return self._common_process(arr_args)
 
-    # 查询离线消息的个数
-    def fetch_messagecount(self, user_id, optional=None):
+    def fetch_msgcount(self, user_id, optional=None):
         """
-        参数：
-            user_id：用户id
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            查询离线消息的个数
+        参数:
+            user_id:用户id
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [user_id, optional]
         arr_args = self._merge_args([self.USER_ID], tmp_args)
         arr_args[self.METHOD] = 'fetch_msgcount'
         return self._common_process(arr_args)
 
-    # 删除离线消息
     def delete_msg(self, user_id, msg_id, optional=None):
         """
-        参数：
-            user_id：用户id
-            msgIds：消息id
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            删除离线消息
+        参数:
+            user_id:用户id
+            msgIds:消息id
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [user_id, msg_id, optional]
         arr_args = self._merge_args([self.USER_ID, self.MSG_IDS], tmp_args)
         arr_args[self.METHOD] = 'delete_msg'
         if isinstance(arr_args[self.MSG_IDS], list):
-            arr_args[self.MSG_IDS] = json.dumps(arr_args[self.MSG_IDS])
+            arr_args[self.MSG_IDS] = dumps(arr_args[self.MSG_IDS])
         return self._common_process(arr_args)
 
-    # 服务器端设置用户标签。
-    # 当该标签不存在时，服务端将会创建该标签。特别地，当user_id被提交时，服务端将会完成用户和tag的绑定操作。
     def set_tag(self, tag_name, optional=None):
         """
-        参数：
-            tag_name：标签
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            服务器端设置用户标签。
+            当该标签不存在时，服务端将会创建该标签。
+            特别地，当user_id被提交时，服务端将会完成用户和tag的绑定操作。
+        参数:
+            tag_name:标签
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [tag_name, optional]
         arr_args = self._merge_args([self.TAG_NAME], tmp_args)
         arr_args[self.METHOD] = 'set_tag'
         return self._common_process(arr_args)
 
-    # App Server查询应用标签
     def fetch_tag(self, optional=None):
         """
-        参数：
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            App Server查询应用标签
+        参数:
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [optional]
         arr_args = self._merge_args([], tmp_args)
         arr_args[self.METHOD] = 'fetch_tag'
         return self._common_process(arr_args)
 
-    # 服务端删除用户标签。
-    # 特别地，当user_id被提交时，服务端将只会完成解除该用户与tag绑定关系的操作。
-    # 注意：该操作不可恢复，请谨慎使用。
     def delete_tag(self, tag_name, optional=None):
         """
-        参数：
-            tag_name：标签
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            服务端删除用户标签。
+            特别地，当user_id被提交时，服务端将只会完成解除该用户与tag绑定关系的操作
+            注意:该操作不可恢复，请谨慎使用。
+        参数:
+            tag_name:标签
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [tag_name, optional]
         arr_args = self._merge_args([self.TAG_NAME], tmp_args)
         arr_args[self.METHOD] = 'delete_tag'
         return self._common_process(arr_args)
 
-    # App Server查询用户所属的标签列表
     def query_user_tag(self, user_id, optional=None):
         """
-        参数：
-            user_id：用户id
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            App Server查询用户所属的标签列表
+        参数:
+            user_id:用户id
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [user_id, optional]
         arr_args = self._merge_args([self.USER_ID], tmp_args)
         arr_args[self.METHOD] = 'query_user_tags'
         return self._common_process(arr_args)
 
-    # 根据channel_id查询设备类型
     def query_device_type(self, channel_id, optional=None):
         """
-        根据channel_id查询设备类型
-        参数：
-            ChannelId：用户Channel的ID号
-            optional：可选参数
-        返回值：
-            成功：python字典；失败：False
+        描述:
+            根据channel_id查询设备类型
+        参数:
+            ChannelId:用户Channel的ID号
+            optional:可选参数
+        返回值:
+            成功:python字典；失败:False
         """
         tmp_args = [channel_id, optional]
         arr_args = self._merge_args([self.CHANNEL_ID], tmp_args)
@@ -351,7 +382,7 @@ class Channel(object):
 
         if ret.status_code == requests.codes.ok:
             return result
-        raise Exception(result)
+        raise BaiduPushError(result)
 
     def _merge_args(self, arr_need, tmp_args):
         arr_args = dict()
@@ -359,20 +390,22 @@ class Channel(object):
         if not arr_need and not tmp_args:
             return arr_args
 
-        if len(tmp_args)-1 != len(arr_need) and len(tmp_args) != len(arr_need):
+        arr_need_len = len(arr_need)
+        tmp_args_len = len(tmp_args)
+        if tmp_args_len not in ( arr_need_len, arr_need_len + 1):
             keys = '('
             for key in arr_need:
                 keys += key + ','
             if key[-1] == '' and key[-2] == ',':
                 keys = keys[0:-2]
             keys += ')'
-            raise Exception('invalid sdk, params, params' + keys + 'are need',
+            raise BaiduPushError('invalid sdk, params, params' + keys + 'are need',
                     self.CHANNEL_SDK_PARAM)
 
-        if len(tmp_args)-1 == len(arr_need) and \
+        if tmp_args_len - 1 == arr_need_len and \
                 tmp_args[-1] is not None and \
-                (not isinstance(tmp_args[-1], dict)):
-            raise Exception('invalid sdk params, '
+                not isinstance(tmp_args[-1], dict):
+            raise BaiduPushError('invalid sdk params, '
                             'optional param must bean dict',
                             self.CHANNEL_SDK_PARAM)
 
@@ -380,7 +413,8 @@ class Channel(object):
         if isinstance(arr_need, list):
             for key in arr_need:
                 if tmp_args[idx] is None:
-                    raise Exception('lack param ' + key, self.CHANNEL_SDK_PARAM)
+                    raise BaiduPushError('lack param ' + key,
+                                         self.CHANNEL_SDK_PARAM)
                 arr_args[key] = tmp_args[idx]
                 idx = idx + 1
 
