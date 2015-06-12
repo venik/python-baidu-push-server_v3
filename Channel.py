@@ -209,7 +209,7 @@ class Channel(object):
         return self._common_process(arr_args)
 
     # 删除离线消息
-    def delete_message(self, user_id, msg_id, optional=None):
+    def delete_msg(self, user_id, msg_id, optional=None):
         """
         参数：
             user_id：用户id
