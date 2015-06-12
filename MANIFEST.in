@@ -1,0 +1,4 @@
+include baidupush
+include CHANGES.txt
+include LICENSE
+include README.rst
