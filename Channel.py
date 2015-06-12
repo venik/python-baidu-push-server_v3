@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # coding=utf-8
 
+"""
+  百度云推送服务端SDK Python版本
+  @version 1.0.0
+"""
+
 import time
 import urllib
 import hashlib
@@ -8,16 +13,10 @@ import json
 import requests
 
 
-###
-# 百度云推送服务端SDK Python版本
-# @version 1.0.0
-###
-
-
 class Channel(object):
     """
     Channel类提供百度云推送服务端SDK的Python版本，
-    用户首先实例化这个类，设置自己的apiKey和secretKey，即可使用Push服务接口
+    用户首先实例化这个类，设置自己的apikey和secretkey，即可使用Push服务接口
     """
     # 用户发起请求时的unix时间戳。本次请求签名的有效时间为该时间戳+10分钟
     TIMESTAMP = 'timestamp'
@@ -113,41 +112,43 @@ class Channel(object):
     CHANNEL_SDK_HTTP_STATUS_ERROR_AND_RESULT_ERROR = 4
     CHANNEL_SDK_HTTP_STATUS_OK_BUT_RESULT_ERROR = 5
 
+    _METHOD_CHANNEL_IN_BODY = ('push_msg', 'set_tag', 'fetch_tag', \
+                                'delete_tag', 'query_user_tags')
+
     ###
     # 对外接口
     ###
 
-    def __init__(self, apiKey, secretKey):
-        self._apiKey = apiKey
-        self._secretKey = secretKey
-        self._requestId = 0
-        self._method_channel_in_body = ['push_msg', 'set_tag', 'fetch_tag', 'delete_tag', 'query_user_tags']
+    def __init__(self, apikey, secretkey):
+        self._apikey = apikey
+        self._secretkey = secretkey
+        self.request_id = 0
 
-    def setApiKey(self, apiKey):
-        self._apiKey = apiKey
+    def set_apikey(self, apikey):
+        self._apikey = apikey
 
-    def setSecretKey(self, secretKey):
-        self._secretKey = secretKey
+    def set_secretkey(self, secretkey):
+        self._secretkey = secretkey
 
-    def getRequestId(self):
-        return self._requestId
+    def get_requestid(self):
+        return self.request_id
 
     # 查询设备、应用、用户与百度Channel的绑定关系
-    def queryBindList(self, userId, optional=None):
+    def query_bindlist(self, user_id, optional=None):
         """
         参数：
-            str userId：用户ID号
+            str user_id：用户ID号
             dict optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [userId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'query_bindlist'
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, optional]
+        arr_args = self._merge_args([self.USER_ID], tmp_args)
+        arr_args[self.METHOD] = 'query_bindlist'
+        return self._common_process(arr_args)
 
     # 推送消息，该接口可用于推送单个人、一群人、所有人以及固定设备的使用场景
-    def pushMessage(self, push_type, messages, message_keys, optional=None):
+    def push_msg(self, push_type, messages, message_keys, optional=None):
         """
         参数：
             push_type：推送消息的类型
@@ -157,186 +158,184 @@ class Channel(object):
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [push_type, messages, message_keys, optional]
-        arrArgs = self._mergeArgs([Channel.PUSH_TYPE, Channel.MESSAGES, Channel.MSG_KEYS], tmpArgs)
-        arrArgs[Channel.METHOD] = 'push_msg'
-        arrArgs[Channel.PUSH_TYPE] = push_type
-        arrArgs[Channel.MESSAGES] = json.dumps(arrArgs[Channel.MESSAGES])
-        arrArgs[Channel.MSG_KEYS] = json.dumps(arrArgs[Channel.MSG_KEYS])
-        return self._commonProcess(arrArgs)
+        tmp_args = [push_type, messages, message_keys, optional]
+        arr_args = self._merge_args([self.PUSH_TYPE, self.MESSAGES, self.MSG_KEYS], tmp_args)
+        arr_args[self.METHOD] = 'push_msg'
+        arr_args[self.PUSH_TYPE] = push_type
+        arr_args[self.MESSAGES] = json.dumps(arr_args[self.MESSAGES])
+        arr_args[self.MSG_KEYS] = json.dumps(arr_args[self.MSG_KEYS])
+        return self._common_process(arr_args)
 
     # 判断设备、应用、用户与Channel的绑定关系是否存在
-    def verifyBind(self, userId, optional=None):
+    def verify_bind(self, user_id, optional=None):
         """
         参数：
-            userId：用户id
+            user_id：用户id
             optional：可选参数
         返回值：
             成功：python数组；失败：False
         """
-        tmpArgs = [userId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'verify_bind'
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, optional]
+        arr_args = self._merge_args([self.USER_ID], tmp_args)
+        arr_args[self.METHOD] = 'verify_bind'
+        return self._common_process(arr_args)
 
     # 查询离线消息
-    def fetchMessage(self, userId, optional=None):
+    def fetch_msg(self, user_id, optional=None):
         """
         参数：
-            userId：用户id
+            user_id：用户id
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [userId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'fetch_msg'
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, optional]
+        arr_args = self._merge_args([self.USER_ID], tmp_args)
+        arr_args[self.METHOD] = 'fetch_msg'
+        return self._common_process(arr_args)
 
     # 查询离线消息的个数
-    def fetchMessageCount(self, userId, optional=None):
+    def fetch_messagecount(self, user_id, optional=None):
         """
         参数：
-            userId：用户id
+            user_id：用户id
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [userId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'fetch_msgcount'
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, optional]
+        arr_args = self._merge_args([self.USER_ID], tmp_args)
+        arr_args[self.METHOD] = 'fetch_msgcount'
+        return self._common_process(arr_args)
 
     # 删除离线消息
-    def deleteMessage(self, userId, msgId, optional=None):
+    def delete_message(self, user_id, msg_id, optional=None):
         """
         参数：
-            userId：用户id
+            user_id：用户id
             msgIds：消息id
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [userId, msgId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID, Channel.MSG_IDS], tmpArgs)
-        arrArgs[Channel.METHOD] = 'delete_msg'
-        if isinstance(arrArgs[Channel.MSG_IDS], list):
-            arrArgs[Channel.MSG_IDS] = json.dumps(arrArgs[Channel.MSG_IDS])
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, msg_id, optional]
+        arr_args = self._merge_args([self.USER_ID, self.MSG_IDS], tmp_args)
+        arr_args[self.METHOD] = 'delete_msg'
+        if isinstance(arr_args[self.MSG_IDS], list):
+            arr_args[self.MSG_IDS] = json.dumps(arr_args[self.MSG_IDS])
+        return self._common_process(arr_args)
 
     # 服务器端设置用户标签。
     # 当该标签不存在时，服务端将会创建该标签。特别地，当user_id被提交时，服务端将会完成用户和tag的绑定操作。
-    def setTag(self, tagName, optional=None):
+    def set_tag(self, tag_name, optional=None):
         """
         参数：
-            tagName：标签
+            tag_name：标签
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [tagName, optional]
-        arrArgs = self._mergeArgs([Channel.TAG_NAME], tmpArgs)
-        arrArgs[Channel.METHOD] = 'set_tag'
-        return self._commonProcess(arrArgs)
+        tmp_args = [tag_name, optional]
+        arr_args = self._merge_args([self.TAG_NAME], tmp_args)
+        arr_args[self.METHOD] = 'set_tag'
+        return self._common_process(arr_args)
 
     # App Server查询应用标签
-    def fetchTag(self, optional=None):
+    def fetch_tag(self, optional=None):
         """
         参数：
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [optional]
-        arrArgs = self._mergeArgs([], tmpArgs)
-        arrArgs[Channel.METHOD] = 'fetch_tag'
-        return self._commonProcess(arrArgs)
+        tmp_args = [optional]
+        arr_args = self._merge_args([], tmp_args)
+        arr_args[self.METHOD] = 'fetch_tag'
+        return self._common_process(arr_args)
 
     # 服务端删除用户标签。
     # 特别地，当user_id被提交时，服务端将只会完成解除该用户与tag绑定关系的操作。
     # 注意：该操作不可恢复，请谨慎使用。
-    def deleteTag(self, tagName, optional=None):
+    def delete_tag(self, tag_name, optional=None):
         """
         参数：
-            tagName：标签
+            tag_name：标签
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [tagName, optional]
-        arrArgs = self._mergeArgs([Channel.TAG_NAME], tmpArgs)
-        arrArgs[Channel.METHOD] = 'delete_tag'
-        return self._commonProcess(arrArgs)
+        tmp_args = [tag_name, optional]
+        arr_args = self._merge_args([self.TAG_NAME], tmp_args)
+        arr_args[self.METHOD] = 'delete_tag'
+        return self._common_process(arr_args)
 
     # App Server查询用户所属的标签列表
-    def queryUserTag(self, userId, optional=None):
+    def query_user_tag(self, user_id, optional=None):
         """
         参数：
-            userId：用户id
+            user_id：用户id
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [userId, optional]
-        arrArgs = self._mergeArgs([Channel.USER_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'query_user_tags'
-        return self._commonProcess(arrArgs)
+        tmp_args = [user_id, optional]
+        arr_args = self._merge_args([self.USER_ID], tmp_args)
+        arr_args[self.METHOD] = 'query_user_tags'
+        return self._common_process(arr_args)
 
     # 根据channel_id查询设备类型
-    def queryDeviceType(self, channelId, optional=None):
+    def query_device_type(self, channel_id, optional=None):
         """
-        根据channelId查询设备类型
+        根据channel_id查询设备类型
         参数：
             ChannelId：用户Channel的ID号
             optional：可选参数
         返回值：
             成功：python字典；失败：False
         """
-        tmpArgs = [channelId, optional]
-        arrArgs = self._mergeArgs([Channel.CHANNEL_ID], tmpArgs)
-        arrArgs[Channel.METHOD] = 'query_device_type'
-        return self._commonProcess(arrArgs)
+        tmp_args = [channel_id, optional]
+        arr_args = self._merge_args([self.CHANNEL_ID], tmp_args)
+        arr_args[self.METHOD] = 'query_device_type'
+        return self._common_process(arr_args)
 
 
     ###
     # 内部函数
     ###
 
-    def _checkString(self, string, minLen, maxLen):
-        return minLen <= len(string) <= maxLen
+    def _adjust_opt(self, opt):
+        if self.TIMESTAMP not in opt:
+            opt[self.TIMESTAMP] = int(time.time())
+        opt[self.HOST] = self.DEFAULT_HOST
+        opt[self.API_KEY] = self._apikey
+        if self.SECRET_KEY in opt:
+            del opt[self.SECRET_KEY]
 
-    def _adjustOpt(self, opt):
-        if Channel.TIMESTAMP not in opt:
-            opt[Channel.TIMESTAMP] = int(time.time())
-        opt[Channel.HOST] = Channel.DEFAULT_HOST
-        opt[Channel.API_KEY] = self._apiKey
-        if Channel.SECRET_KEY in opt:
-            del opt[Channel.SECRET_KEY]
-
-    def _genSign(self, method, url, arrContent):
+    def _gen_sign(self, method, url, arr_content):
         gather = method + url
-        keys = arrContent.keys()
+        keys = arr_content.keys()
         keys.sort()
         for key in keys:
-            gather += key + '=' + str(arrContent[key])
-        gather += self._secretKey
+            gather += key + '=' + str(arr_content[key])
+        gather += self._secretkey
         sign = hashlib.md5(urllib.quote_plus(gather))
         return sign.hexdigest()
 
-    def _baseControl(self, opt):
+    def _base_control(self, opt):
         resource = 'channel'
-        if Channel.CHANNEL_ID in opt:
-            if opt[Channel.CHANNEL_ID] and opt[Channel.METHOD] not in self._method_channel_in_body:
-                resource = opt[Channel.CHANNEL_ID]
-                del opt[Channel.CHANNEL_ID]
+        if self.CHANNEL_ID in opt:
+            if opt[self.CHANNEL_ID] and \
+                    opt[self.METHOD] not in self._METHOD_CHANNEL_IN_BODY:
+                resource = opt[self.CHANNEL_ID]
+                del opt[self.CHANNEL_ID]
 
-        host = opt[Channel.HOST]
-        del opt[Channel.HOST]
+        host = opt[self.HOST]
+        del opt[self.HOST]
 
-        url = 'http://' + host + '/rest/2.0/' + Channel.PRODUCT + '/'
+        url = 'http://' + host + '/rest/2.0/' + self.PRODUCT + '/'
         url += resource
         http_method = 'POST'
-        opt[Channel.SIGN] = self._genSign(http_method, url, opt)
+        opt[self.SIGN] = self._gen_sign(http_method, url, opt)
 
         headers = dict()
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -344,45 +343,50 @@ class Channel(object):
 
         return requests.post(url, data=opt, headers=headers)
 
-    def _commonProcess(self, paramOpt):
-        self._adjustOpt(paramOpt)
-        ret = self._baseControl(paramOpt)
+    def _common_process(self, param_opt):
+        self._adjust_opt(param_opt)
+        ret = self._base_control(param_opt)
         result = ret.json()
-        self._requestId = result['request_id']
+        self.request_id = result['request_id']
 
         if ret.status_code == requests.codes.ok:
             return result
         raise Exception(result)
 
-    def _mergeArgs(self, arrNeed, tmpArgs):
-        arrArgs = dict()
+    def _merge_args(self, arr_need, tmp_args):
+        arr_args = dict()
 
-        if not arrNeed and not tmpArgs:
-            return arrArgs
+        if not arr_need and not tmp_args:
+            return arr_args
 
-        if len(tmpArgs)-1 != len(arrNeed) and len(tmpArgs) != len(arrNeed):
+        if len(tmp_args)-1 != len(arr_need) and len(tmp_args) != len(arr_need):
             keys = '('
-            for key in arrNeed:
+            for key in arr_need:
                 keys += key + ','
             if key[-1] == '' and key[-2] == ',':
                 keys = keys[0:-2]
             keys += ')'
-            raise Exception('invalid sdk, params, params' + keys + 'are need', Channel.CHANNEL_SDK_PARAM)
+            raise Exception('invalid sdk, params, params' + keys + 'are need',
+                    self.CHANNEL_SDK_PARAM)
 
-        if len(tmpArgs)-1 == len(arrNeed) and tmpArgs[-1] is not None and (not isinstance(tmpArgs[-1], dict)):
-            raise Exception('invalid sdk params, optional param must bean dict', Channel.CHANNEL_SDK_PARAM)
+        if len(tmp_args)-1 == len(arr_need) and \
+                tmp_args[-1] is not None and \
+                (not isinstance(tmp_args[-1], dict)):
+            raise Exception('invalid sdk params, '
+                            'optional param must bean dict',
+                            self.CHANNEL_SDK_PARAM)
 
         idx = 0
-        if isinstance(arrNeed, list):
-            for key in arrNeed:
-                if tmpArgs[idx] is None:
-                    raise Exception('lack param ' + key, Channel.CHANNEL_SDK_PARAM)
-                arrArgs[key] = tmpArgs[idx]
+        if isinstance(arr_need, list):
+            for key in arr_need:
+                if tmp_args[idx] is None:
+                    raise Exception('lack param ' + key, self.CHANNEL_SDK_PARAM)
+                arr_args[key] = tmp_args[idx]
                 idx = idx + 1
 
-        if len(tmpArgs) == idx + 1 and tmpArgs[idx] is not None:
-            for (key, value) in tmpArgs[idx].items():
-                if key not in arrArgs and value is not None:
-                    arrArgs[key] = value
+        if len(tmp_args) == idx + 1 and tmp_args[idx] is not None:
+            for (key, value) in tmp_args[idx].items():
+                if key not in arr_args and value is not None:
+                    arr_args[key] = value
 
-        return arrArgs
+        return arr_args
