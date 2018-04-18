@@ -1,16 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # coding=utf-8
 
 import sys
 import time
-sys.path.append("..")
+sys.path.append("../")
 from baidupush import BaiduPush
 
 # 以下只是测试数据，请使用者自行修改为可用数据
-apikey = "76Yi0ZBGGV2HrAziIiYEFtRh"
-secretkey = "xxxxxxxxxxxxx"
-user_id = "1105115563847474869"
-channel_id = 3944730196422489622
+apikey = ""
+secretkey = ""
+user_id = ""
+channel_id = 
 
 message = "{'title':'baidu push','description':'message from python sdk'}"
 message_key = "key1"
@@ -23,7 +23,9 @@ def test_pushMessage_to_user():
     optional[BaiduPush.USER_ID] = user_id
     optional[BaiduPush.CHANNEL_ID] = channel_id
     # 推送通知类型
-    optional[BaiduPush.MESSAGE_TYPE] = BaiduPush.PUSH_NOTIFICATION
+    #optional[BaiduPush.MESSAGE_TYPE] = BaiduPush.PUSH_NOTIFICATION
+    optional[BaiduPush.MESSAGE_TYPE] = BaiduPush.PUSH_MESSAGE
+
     ret = c.push_msg(push_type, message, message_key, optional)
     print ret
 
@@ -101,25 +103,25 @@ def test_queryDeviceType():
 if __name__ == '__main__':
     test_pushMessage_to_user()
     time.sleep(1)
-    test_pushMessage_to_tag()
-    time.sleep(1)
-    test_pushMessage_to_all()
-    time.sleep(1)
-    test_queryBindList()
-    time.sleep(1)
-    test_verifyBind()
-    time.sleep(1)
-    test_fetchMessage()
-    time.sleep(1)
-    test_deleteMessage()
-    time.sleep(1)
-    test_setTag()
-    time.sleep(1)
-    test_fetchTag()
-    time.sleep(1)
-    test_deleteTag()
-    time.sleep(1)
-    test_queryUserTag()
-    time.sleep(1)
-    test_queryDeviceType()
-    time.sleep(1)
+    #test_pushMessage_to_tag()
+    #time.sleep(1)
+    #test_pushMessage_to_all()
+    #time.sleep(1)
+    #test_queryBindList()
+    #time.sleep(1)
+    #test_verifyBind()
+    #time.sleep(1)
+    #test_fetchMessage()
+    #time.sleep(1)
+    #test_deleteMessage()
+    #time.sleep(1)
+    #test_setTag()
+    #time.sleep(1)
+    #test_fetchTag()
+    #time.sleep(1)
+    #test_deleteTag()
+    #time.sleep(1)
+    #test_queryUserTag()
+    #time.sleep(1)
+    #test_queryDeviceType()
+    #time.sleep(1)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # coding=utf-8
 
 """
@@ -9,6 +9,7 @@
 import time
 import urllib
 import hashlib
+import logging
 
 try:
     # ujson is faster than normal json
@@ -58,7 +59,7 @@ class BaiduPush(object):
     LIMIT = 'limit'
 
     # 指定消息内容，单个消息为单独字符串
-    MESSAGES = 'messages'
+    MESSAGES = 'msg'
 
     # 删除的消息id列表，由一个或多个msg_id组成，多个用json数组表示
     MSG_IDS = 'msg_ids'
@@ -67,7 +68,7 @@ class BaiduPush(object):
     MSG_KEYS = 'msg_keys'
 
     # 消息类型，0:消息（透传），1:通知，默认为0
-    MESSAGE_TYPE = 'message_type'
+    MESSAGE_TYPE = 'msg_type'
 
     # 可选消息类型
     PUSH_MESSAGE = 0
@@ -87,6 +88,8 @@ class BaiduPush(object):
 
     # 访问令牌，明文AK，可从此值获得App的信息，配合sign中的sk做合法性身份认证。
     API_KEY = 'apikey'
+
+    DEVICE_TYPE = 'device_type'
 
     # 开发者密钥，用于调用HTTP API时进行签名加密，以证明开发者的合法身份。
     SECRET_KEY = 'secret_key'
@@ -339,6 +342,7 @@ class BaiduPush(object):
             opt[self.TIMESTAMP] = int(time.time())
         opt[self.HOST] = self.DEFAULT_HOST
         opt[self.API_KEY] = self._apikey
+        opt[self.DEVICE_TYPE] = 3
         if self.SECRET_KEY in opt:
             del opt[self.SECRET_KEY]
 
@@ -363,14 +367,28 @@ class BaiduPush(object):
         host = opt[self.HOST]
         del opt[self.HOST]
 
-        url = 'http://' + host + '/rest/2.0/' + self.PRODUCT + '/'
-        url += resource
+        #url = 'http://' + host + '/rest/2.0/' + self.PRODUCT + '/'
+        #url += resource
+        url = 'http://api.tuisong.baidu.com/rest/3.0/push/single_device'
+        #url = 'http://api.tuisong.baidu.com/rest/3.0/push/all'
         http_method = 'POST'
         opt[self.SIGN] = self._gen_sign(http_method, url, opt)
 
+        print('opt:\n' + str(opt))
+
         headers = dict()
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        headers['User-Agent'] = 'Baidu Channel Service Pythonsdk Client'
+        headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8'
+
+        # format is important!!!!
+        # https://translate.google.com/translate?sl=zh-CN&tl=en&js=y&prev=_t&hl=en&ie=UTF-8&u=http%3A%2F%2Fpush.baidu.com%2Fdoc%2Frestapi%2Fsdk_developer&edit-text=&act=url&act=url
+        headers['User-Agent'] = 'BCCS_SDK/3.0 (Darwin; Darwin Kernel Version 14.0.0: Fri Sep 19 00:26:44 PDT 2014; root:xnu-2782.1.97~2/RELEASE_X86_64; x86_64) PHP/5.6.3 (Baidu Push Server SDK V3.0.0 and so on..) cli/Unknown ZEND/2.6.0'
+        print('headers:\n' + str(headers))
+
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
+        requests_log = logging.getLogger("requests.packages.urllib")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True
 
         return requests.post(url, data=opt, headers=headers)
 
