@@ -1,5 +1,8 @@
 Well, I didnt do much just fixed to properly support Baidu v3, all credits go to the original authors
 
+original source is from
+https://github.com/quatanium/python-baidu-push-server
+
 some docs
 https://translate.googleusercontent.com/translate_c?act=url&depth=1&hl=ru&ie=UTF8&prev=_t&rurl=translate.google.com&sl=zh-CN&sp=nmt4&tl=en&u=http://push.baidu.com/doc/restapi/restapi&xid=17259,15700023,15700124,15700149,15700168,15700173,15700186,15700201&usg=ALkJrhjzVvfE74uxeux5tjyUJU4s73wR6Q
 
